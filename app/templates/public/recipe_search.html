@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>{% block title %}{% endblock %}</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/aos/aos.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/boxicons/css/boxicons.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/glightbox/css/glightbox.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/remixicon/remixicon.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/swiper/swiper-bundle.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/simple-datatables/style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <!-- Template Main CSS File -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/recipe_style.css') }}">
+
+  <!-- =======================================================
+  * Template Name: OnePage - v4.7.0
+  * Template URL: https://bootstrapmade.com/onepage-multipurpose-bootstrap-template/
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+<body>
+  <div class="container">
+    <h1>Recipe Finder</h1>
+    <form id="searchForm">
+        <div class="form-group">
+            <label for="ingredients" class="fw-bold">Ingredients:</label>
+            <input type="text" id="ingredients" name="ingredients" placeholder="Input Ingredients" required>
+        </div>
+        <div class="form-group">
+            <label for="preferences" class="fw-bold">Dietary Preferences:</label>
+            <select id="preferences" name="preferences" multiple>
+                <option value="vegan">Vegan</option>
+                <option value="vegetarian">Vegetarian</option>
+                <option value="gluten-free">Gluten-Free</option>
+                <option value="dairy-free">Dairy-Free</option>
+                <option value="low-sugar">Low Sugar</option>
+                <!-- Add more preferences as needed -->
+            </select>
+        </div>
+        <button type="submit">Search</button>
+    </form>
+    <div id="results" class="recipe-grid"></div>
+  </div>
+
+  <!-- Vendor JS Files -->
+    <script src="{{ url_for('static', filename="vendor/purecounter/purecounter.js") }}"></script>
+    <script src="{{ url_for('static', filename="vendor/aos/aos.js") }}"></script>
+    <script src="{{ url_for('static', filename="vendor/bootstrap/js/bootstrap.bundle.min.js") }}"></script>
+    <script src="{{ url_for('static', filename="vendor/glightbox/js/glightbox.min.js") }}"></script>
+    <script src="{{ url_for('static', filename="vendor/isotope-layout/isotope.pkgd.min.js") }}"></script>
+    <script src="{{ url_for('static', filename="vendor/swiper/swiper-bundle.min.js") }}"></script>
+    <script src="{{ url_for('static', filename="vendor/php-email-form/validate.js") }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Template Main JS File -->
+  <script>
+    $(document).ready(function() {
+      $('#searchForm').on('submit', function(event) {
+          event.preventDefault();
+          $.ajax({
+              url: '/search',
+              type: 'POST',
+              data: $(this).serialize(),
+              success: function(response) {
+                  $('#results').empty();
+                  if (response.hits.length > 0) {
+                      response.hits.forEach(function(hit) {
+                          $('#results').append(`
+                              <div class="recipe-card">
+                                  <img src="${hit.recipe.image}" alt="${hit.recipe.label}" class="recipe-image">
+                                  <div class="recipe-content">
+                                      <h2>${hit.recipe.label}</h2>
+                                      <p><strong>Ingredients:</strong></p>
+                                      <ul>
+                                          ${hit.recipe.ingredientLines.map(ingredient => `<li>${ingredient}</li>`).join('')}
+                                      </ul>
+                                      <p><strong>Calories:</strong> ${hit.recipe.calories.toFixed(2)}</p>
+                                      <a href="${hit.recipe.url}" target="_blank" class="recipe-link">View Full Recipe</a>
+                                  </div>
+                              </div>
+                          `);
+                      });
+                  } else {
+                      $('#results').append('<p>No recipes found.</p>');
+                  }
+              }
+          });
+      });
+    });
+  </script>
+</body>
+</html>
