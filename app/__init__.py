@@ -22,4 +22,3 @@ MONGO_URI = "mongodb+srv://fabulous95:Skyview95.ii@cluster0.nz9zg.mongodb.net/Re
 mongo = PyMongo(app, MONGO_URI)
 
 from app import views
-from app import admin 
