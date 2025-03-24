@@ -1,11 +1,17 @@
 from flask import Flask
 from flask_pymongo import PyMongo
+from dotenv import load_dotenv
 import os
+
+# Load environment variables from the .env file
+load_dotenv()
 
 app = Flask(__name__)
 
-
-SECRET_KEY = os.environ.get('SECRET_KEY') or "ajajajjsjsjajjajaaw333"
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['EDAMAM_API_ID'] = os.getenv('EDAMAM_API_ID')
+app.config['EDAMAM_API_KEY'] = os.getenv('EDAMAM_API_KEY')
+app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 
 #app configuration
 app_settings = os.environ.get(
@@ -14,12 +20,7 @@ app_settings = os.environ.get(
 ) 
 app.config.from_object(app_settings)
 
-
-#connecting to database
-MONGO_URI = "mongodb+srv://fabulous95:Skyview95.ii@cluster0.nz9zg.mongodb.net/RecipeFinderApp?retryWrites=true&w=majority"
-
 #initializing PyMongo
-mongo = PyMongo(app, MONGO_URI)
+mongo = PyMongo(app, app.config['MONGO_URI'])
 
 from app import views
-from app import admin 

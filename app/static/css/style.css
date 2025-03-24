@@ -367,15 +367,15 @@ h1, h2, h3, h4, h5, h6 {
   left: 0;
   right: 0;
 }
-#hero .container {
+#hero .hero-container {
   padding-top: 80px;
 }
 #hero h1 {
   margin: 0;
-  font-size: 56px;
+  font-size: 50px;
   font-weight: 700;
-  line-height: 72px;
-  color: rgb(153, 93, 52);
+  line-height: 60px;
+  color: rgb(52, 84, 153);
   font-family: "Poppins", sans-serif;
 }
 #hero h2 {
