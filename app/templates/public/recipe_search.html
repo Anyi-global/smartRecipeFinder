@@ -39,28 +39,45 @@
   ======================================================== -->
 </head>
 <body>
-  <div class="container">
-    <h1>Recipe Finder</h1>
-    <form id="searchForm">
-        <div class="form-group">
-            <label for="ingredients" class="fw-bold">Ingredients:</label>
-            <input type="text" id="ingredients" name="ingredients" placeholder="Input Ingredients" required>
-        </div>
-        <div class="form-group">
-            <label for="preferences" class="fw-bold">Dietary Preferences:</label>
-            <select id="preferences" name="preferences" multiple>
-                <option value="vegan">Vegan</option>
-                <option value="vegetarian">Vegetarian</option>
-                <option value="gluten-free">Gluten-Free</option>
-                <option value="dairy-free">Dairy-Free</option>
-                <option value="low-sugar">Low Sugar</option>
-                <!-- Add more preferences as needed -->
-            </select>
-        </div>
-        <button type="submit">Search</button>
-    </form>
-    <div id="results" class="recipe-grid"></div>
-  </div>
+    <div class="container mt-5">
+        <h1>Smart Recipe Finder Search Page</h1>
+        <form id="searchForm">
+            <div class="form-group">
+                <label for="ingredients">Ingredients:</label>
+                <input type="text" id="ingredients" name="ingredients" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="preferences">Dietary Preferences:</label>
+                <select id="preferences" name="preferences" class="form-control">
+                    <option value="">--Select Preference--</option>
+                    <option value="vegan">Vegan</option>
+                    <option value="vegetarian">Vegetarian</option>
+                    <option value="gluten-free">Gluten-Free</option>
+                    <option value="dairy-free">Dairy-Free</option>
+                    <option value="low-sugar">Low Sugar</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="cuisineType">Cuisine Type:</label>
+                <select id="cuisineType" name="cuisineType" class="form-control">
+                    <option value="">--Select Cuisine--</option>
+                    <option value="American">American</option>
+                    <option value="Chinese">Chinese</option>
+                    <option value="Indian">Indian</option>
+                    <option value="Italian">Italian</option>
+                    <option value="Mexican">Mexican</option>
+                    <option value="French">French</option>
+                    <option value="Japanese">Japanese</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        <div id="results" class="row mt-5"></div>
+    </div>
 
   <!-- Vendor JS Files -->
     <script src="{{ url_for('static', filename="vendor/purecounter/purecounter.js") }}"></script>
@@ -73,40 +90,90 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- Template Main JS File -->
-  <script>
-    $(document).ready(function() {
-      $('#searchForm').on('submit', function(event) {
-          event.preventDefault();
-          $.ajax({
-              url: '/search',
-              type: 'POST',
-              data: $(this).serialize(),
-              success: function(response) {
-                  $('#results').empty();
-                  if (response.hits.length > 0) {
-                      response.hits.forEach(function(hit) {
-                          $('#results').append(`
-                              <div class="recipe-card">
-                                  <img src="${hit.recipe.image}" alt="${hit.recipe.label}" class="recipe-image">
-                                  <div class="recipe-content">
-                                      <h2>${hit.recipe.label}</h2>
-                                      <p><strong>Ingredients:</strong></p>
-                                      <ul>
-                                          ${hit.recipe.ingredientLines.map(ingredient => `<li>${ingredient}</li>`).join('')}
-                                      </ul>
-                                      <p><strong>Calories:</strong> ${hit.recipe.calories.toFixed(2)}</p>
-                                      <a href="${hit.recipe.url}" target="_blank" class="recipe-link">View Full Recipe</a>
-                                  </div>
-                              </div>
-                          `);
-                      });
-                  } else {
-                      $('#results').append('<p>No recipes found.</p>');
-                  }
-              }
-          });
-      });
-    });
-  </script>
+    <script>
+        $(document).ready(function() {
+            $('#searchForm').on('submit', function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: '/search',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#results').empty();
+                        if (response.hits && response.hits.length > 0) {
+                            response.hits.forEach(function(hit) {
+                                $('#results').append(`
+                                    <div class="col-md-4">
+                                        <div class="card mb-4">
+                                            <img class="card-img-top" src="${hit.recipe.image}" alt="${hit.recipe.label}">
+                                            <div class="card-body">
+                                                <h5 class="card-title">${hit.recipe.label}</h5>
+                                                <p class="card-text"><strong>Ingredients:</strong></p>
+                                                <ul>
+                                                    ${hit.recipe.ingredientLines.map(ingredient => `<li>${ingredient}</li>`).join('')}
+                                                </ul>
+                                                <p class="card-text"><strong>Calories:</strong> ${hit.recipe.calories.toFixed(2)}</p>
+                                                <a href="${hit.recipe.url}" target="_blank" class="btn btn-primary">View Full Recipe</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `);
+                            });
+                        } else {
+                            $('#results').append('<div class="alert alert-warning">No recipes found. Please try different ingredients or filters.</div>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#results').empty();
+                        $('#results').append(`
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                An error occurred while fetching recipes: ${xhr.responseJSON ? xhr.responseJSON.error : 'Server error'}. Please try again later.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        `);
+                        console.error("Error:", error);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- <script>
+        $(document).ready(function() {
+            $('#searchForm').on('submit', function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: '/search',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#results').empty();
+                        if (response.hits.length > 0) {
+                            response.hits.forEach(function(hit) {
+                                $('#results').append(`
+                                    <div class="col-md-4">
+                                        <div class="card mb-4">
+                                            <img class="card-img-top" src="${hit.recipe.image}" alt="${hit.recipe.label}">
+                                            <div class="card-body">
+                                                <h5 class="card-title">${hit.recipe.label}</h5>
+                                                <p class="card-text"><strong>Ingredients:</strong></p>
+                                                <ul>
+                                                    ${hit.recipe.ingredientLines.map(ingredient => `<li>${ingredient}</li>`).join('')}
+                                                </ul>
+                                                <p class="card-text"><strong>Calories:</strong> ${hit.recipe.calories.toFixed(2)}</p>
+                                                <a href="${hit.recipe.url}" target="_blank" class="btn btn-primary">View Full Recipe</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `);
+                            });
+                        } else {
+                            $('#results').append('<p>No recipes found.</p>');
+                        }
+                    }
+                });
+            });
+        });
+    </script> -->
 </body>
 </html>
