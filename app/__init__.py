@@ -1,6 +1,8 @@
 from flask import Flask
-from flask_pymongo import PyMongo
-from dotenv import load_dotenv
+# from flask_pymongo import PyMongo
+from pymongo import MongoClient
+import certifi
+from dotenv import load_dotenv # type: ignore
 import os
 
 # Load environment variables from the .env file
@@ -21,6 +23,11 @@ app_settings = os.environ.get(
 app.config.from_object(app_settings)
 
 #initializing PyMongo
-mongo = PyMongo(app, app.config['MONGO_URI'])
+# mongo = PyMongo(app, app.config['MONGO_URI'])
+ca = certifi.where()
+client = MongoClient(app.config['MONGO_URI'], tlsCAFile=ca)
+# mongo = client.get_default_database()
+mongo = client["RecipeFinderApp"]
+
 
 from app import views

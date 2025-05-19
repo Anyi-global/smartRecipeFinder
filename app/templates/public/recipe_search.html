@@ -120,7 +120,7 @@
                                 `);
                             });
                         } else {
-                            $('#results').append('<div class="alert alert-warning">No recipes found. Please try different ingredients or filters.</div>');
+                            $('#results').append('<div class="alert alert-warning">No recipes found. Please try different ingredients or filters. <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
                         }
                     },
                     error: function(xhr, status, error) {
