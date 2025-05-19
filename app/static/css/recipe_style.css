@@ -71,29 +71,49 @@ button:hover {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    height: 100%; /* ensures it can grow equally */
+    min-height: 500px; /* set a consistent card height */
 }
 
 .recipe-image {
     width: 100%;
-    height: auto;
+    height: 200px;
+    object-fit: cover;
 }
 
 .recipe-content {
+    display: flex;
+    flex-direction: column;
     padding: 20px;
+    flex-grow: 1;
+    overflow: hidden;
 }
 
 .recipe-content h2 {
     margin-top: 0;
 }
 
-.recipe-content ul {
+.recipe-content .ingredients {
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 160px;
+    margin-bottom: 10px;
+    padding-right: 10px;
+}
+
+.recipe-content .ingredients ul {
     list-style-type: disc;
     padding-left: 20px;
+    margin: 0;
+}
+
+.recipe-content p {
+    margin-bottom: 10px;
 }
 
 .recipe-content .recipe-link {
     display: inline-block;
-    margin-top: 10px;
+    margin-top: auto;
     padding: 10px 15px;
     background-color: #007bff;
     color: #fff;

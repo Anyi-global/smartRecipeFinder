@@ -49,7 +49,7 @@
 
             <div class="form-group">
                 <label for="preferences">Dietary Preferences:</label>
-                <select id="preferences" name="preferences" class="form-control">
+                <select id="preferences" name="preferences" class="form-control" multiple>
                     <option value="">--Select Preference--</option>
                     <option value="vegan">Vegan</option>
                     <option value="vegetarian">Vegetarian</option>
@@ -95,30 +95,39 @@
             $('#searchForm').on('submit', function(event) {
                 event.preventDefault();
                 $.ajax({
-                    url: '/search',
+                    url: '/api/search-recipe',
                     type: 'POST',
                     data: $(this).serialize(),
                     success: function(response) {
                         $('#results').empty();
                         if (response.hits && response.hits.length > 0) {
-                            response.hits.forEach(function(hit) {
-                                $('#results').append(`
-                                    <div class="col-md-4">
-                                        <div class="card mb-4">
-                                            <img class="card-img-top" src="${hit.recipe.image}" alt="${hit.recipe.label}">
-                                            <div class="card-body">
-                                                <h5 class="card-title">${hit.recipe.label}</h5>
-                                                <p class="card-text"><strong>Ingredients:</strong></p>
+                            const maxCards = 12;
+                            const hitsToShow = response.hits.slice(0, maxCards);
+
+                            const recipeGrid = $('<div class="recipe-grid"></div>');
+
+                            hitsToShow.forEach(function(hit) {
+                                const recipe = hit.recipe;
+                                const cardHtml = `
+                                    <div class="recipe-card">
+                                        <img class="recipe-image" src="${recipe.image}" alt="${recipe.label}">
+                                        <div class="recipe-content">
+                                            <h2>${recipe.label}</h2>
+                                            <p><strong>Cuisine:</strong> ${recipe.cuisineType ? recipe.cuisineType.join(', ') : 'N/A'}</p>
+                                            <div class="ingredients">
                                                 <ul>
-                                                    ${hit.recipe.ingredientLines.map(ingredient => `<li>${ingredient}</li>`).join('')}
+                                                    ${recipe.ingredientLines.map(ingredient => `<li>${ingredient}</li>`).join('')}
                                                 </ul>
-                                                <p class="card-text"><strong>Calories:</strong> ${hit.recipe.calories.toFixed(2)}</p>
-                                                <a href="${hit.recipe.url}" target="_blank" class="btn btn-primary">View Full Recipe</a>
                                             </div>
+                                            <p><strong>Calories:</strong> ${recipe.calories.toFixed(2)}</p>
+                                            <a href="${recipe.url}" target="_blank" class="recipe-link">View Full Recipe</a>
                                         </div>
                                     </div>
-                                `);
+                                `;
+                                recipeGrid.append(cardHtml);
                             });
+
+                            $('#results').append(recipeGrid);
                         } else {
                             $('#results').append('<div class="alert alert-warning">No recipes found. Please try different ingredients or filters. <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
                         }

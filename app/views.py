@@ -26,10 +26,6 @@ app.config["UPLOAD_FOLDER"] = "/Users/ANYIGLOBAL/Desktop/MyProject/app/static/up
 app.config["ALLOWED_EXTENSIONS"] = ["TXT", "DOC", "PNG", "JPG", "JPEG", "GIF"]
 app.config["CLIENT_IMAGES"] = "/Users/Anyiglobal/Desktop/MyProject/app/static/img/clients"
 
-# Replace with your Edamam API ID and Key
-EDAMAM_APP_ID = 'f1347fb1'
-EDAMAM_APP_KEY = 'f9c7a54baf10512d0a42f5cc948e7a69'
-
 def nigerian_time():
     '''
     This is a function that extracts
@@ -97,35 +93,44 @@ def recipe_search():
     return render_template('public/recipe_search.html')
 
 
-@app.route('/search', methods=['POST'])
+@app.route('/api/search-recipe', methods=['POST'])
 def search():
-    ingredients = request.form['ingredients']
+    ingredients = request.form['ingredients'].lower()
     dietary_preferences = request.form.getlist('preferences')
-    cuisine_type = request.form.get('cuisineType')  # Get the selected cuisine type
+    cuisine_type = request.form.get('cuisineType').lower()  # Get the selected cuisine type
+
+    # Ensure ingredients are provided
+    if not ingredients:
+        return jsonify({"error": "Please enter ingredients to search."}), 400
 
     # Edamam API URL
-    api_url = 'https://api.edamam.com/search'
+    api_url = 'https://api.edamam.com/api/recipes/v2'
     params = {
         'q': ingredients,
         'app_id': os.getenv('EDAMAM_API_ID'),
         'app_key': os.getenv('EDAMAM_API_KEY'),
-        'health': dietary_preferences,
-        'cuisineType': cuisine_type.lower()
+        'type': 'public'
     }
 
-    # # If the user selected any dietary preferences, add them
-    # if dietary_preferences:
-    #     params['health'] = dietary_preferences
+    # Add dietary preferences (if any)
+    for pref in dietary_preferences:
+        params.setdefault('health', []).append(pref.lower())
 
-    # # If the user selected a cuisine type, add it
-    # if cuisine_type:
-    #     params['cuisineType'] = cuisine_type.lower()  # Edamam expects cuisine types in lowercase
-    
-    response = requests.get(api_url, params=params)
+    # Add cuisine type if provided    
+    if cuisine_type:
+        params['cuisineType'] = cuisine_type
 
-    data = response.json()
-
-    return jsonify(data)
+    try:
+        response = requests.get(api_url, params=params)
+        response.raise_for_status()
+        data = response.json()
+        return jsonify(data)
+    except requests.exceptions.JSONDecodeError:
+        print("JSON decode error - raw response:", response.text)
+        return jsonify({"error": "Failed to decode JSON response from Edamam API."})
+    except requests.exceptions.RequestException as e:
+        print("Request failed:", str(e))
+        return jsonify({"error": "Failed to fetch data from Edamam API."})
 
 # SignUp EndPoint
 @app.route("/sign-up", methods=["GET", "POST"])
