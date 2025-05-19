@@ -20,6 +20,16 @@ from functools import wraps
 
 # app.config = os.urandom(24)
 
+app.config["SECRET_KEY"] = "b'n\x1d\xb1\x8a\xc0Jg\x1d\x08|!F3\x04P\xbf'"
+
+app.config["UPLOAD_FOLDER"] = "/Users/ANYIGLOBAL/Desktop/MyProject/app/static/uploads"
+app.config["ALLOWED_EXTENSIONS"] = ["TXT", "DOC", "PNG", "JPG", "JPEG", "GIF"]
+app.config["CLIENT_IMAGES"] = "/Users/Anyiglobal/Desktop/MyProject/app/static/img/clients"
+
+# Replace with your Edamam API ID and Key
+EDAMAM_APP_ID = 'f1347fb1'
+EDAMAM_APP_KEY = 'f9c7a54baf10512d0a42f5cc948e7a69'
+
 def nigerian_time():
     '''
     This is a function that extracts
@@ -63,14 +73,29 @@ def register():
     return render_template("public/register.html")
 
 # user dashbord endpoint
+    
+
 @app.route("/users/dashboard")
 @login_required
 def users_dashboard():
     return render_template("public/users_portal.html")
 
+
+@app.route("/all-given-assignments")
+@login_required
+def all_given_assignments():
+    return render_template("public/view_all_given_assignments.html")
+
+@app.route("/view-assignment-score")
+@login_required
+def view_assignment_score():
+    return render_template("public/view_assignment_score.html")
+
+
 @app.route('/recipe-search')
 def recipe_search():
     return render_template('public/recipe_search.html')
+
 
 @app.route('/search', methods=['POST'])
 def search():
