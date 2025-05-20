@@ -20,11 +20,7 @@ from functools import wraps
 
 # app.config = os.urandom(24)
 
-app.config["SECRET_KEY"] = "b'n\x1d\xb1\x8a\xc0Jg\x1d\x08|!F3\x04P\xbf'"
-
-app.config["UPLOAD_FOLDER"] = "/Users/ANYIGLOBAL/Desktop/MyProject/app/static/uploads"
-app.config["ALLOWED_EXTENSIONS"] = ["TXT", "DOC", "PNG", "JPG", "JPEG", "GIF"]
-app.config["CLIENT_IMAGES"] = "/Users/Anyiglobal/Desktop/MyProject/app/static/img/clients"
+# app.config["SECRET_KEY"] = "b'n\x1d\xb1\x8a\xc0Jg\x1d\x08|!F3\x04P\xbf'"
 
 def nigerian_time():
     '''
