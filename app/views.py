@@ -1,37 +1,35 @@
 from app import app, mongo
-
 from flask import render_template, request, url_for, redirect, flash, session, jsonify
-
 from werkzeug.utils import secure_filename
-
 from flask import send_from_directory, abort
-
 from flask_mongoengine import MongoEngine
-
 import bson.binary
-
 import urllib.request
-
 import os, re, requests
-
 import datetime
-
+import pytz
 from functools import wraps
 
 # app.config = os.urandom(24)
 
 # app.config["SECRET_KEY"] = "b'n\x1d\xb1\x8a\xc0Jg\x1d\x08|!F3\x04P\xbf'"
 
-def nigerian_time():
+def finnish_time():
     '''
-    This is a function that extracts
-    the current Nigerian time
+    This function extracts
+    the current Finnish time
     '''
-    now = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-    today = datetime.date.today()
+    # Define Finnish timezone
+    helsinki = pytz.timezone('Europe/Helsinki')
+    
+    # Get current time in Finnish timezone
+    now = datetime.datetime.now(helsinki)
+    today = now.date()
+    
     d2 = today.strftime("%B %d, %Y")
     tm = now.strftime("%H:%M:%S:%p")
-    return (d2 +' '+'at'+' '+tm)
+    
+    return f"{d2} at {tm}"
 
 def login_required(f):
     @wraps(f)
@@ -153,7 +151,7 @@ def sign_up():
             flash("Sorry, User with email address already exists!", "danger")
             return render_template("public/register.html")
         
-        mongo.db.signup.insert_one({"username": username, username:username, "email": email, email:email, "password": password, "activationStatus":"0", "registeredDate": nigerian_time()})
+        mongo.db.signup.insert_one({"username": username, username:username, "email": email, email:email, "password": password, "activationStatus":"0", "registeredDate": finnish_time()})
         flash("Account Created Successfully!", "success")
         return redirect(url_for("index"))
     else:
