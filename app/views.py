@@ -15,29 +15,22 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 # app.config["SECRET_KEY"] = "b'n\x1d\xb1\x8a\xc0Jg\x1d\x08|!F3\x04P\xbf'"
 
-def nigerian_time():
-    now = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-    today = datetime.date.today()
+def finnish_time():
+    '''
+    This function extracts
+    the current Finnish time
+    '''
+    # Define Finnish timezone
+    helsinki = pytz.timezone('Europe/Helsinki')
+    
+    # Get current time in Finnish timezone
+    now = datetime.datetime.now(helsinki)
+    today = now.date()
+    
     d2 = today.strftime("%B %d, %Y")
-    tm = now.strftime("%H:%M:%S %p")
-    return (d2 +' '+'at'+' '+tm)
-
-# def finnish_time():
-#     '''
-#     This function extracts
-#     the current Finnish time
-#     '''
-#     # Define Finnish timezone
-#     helsinki = pytz.timezone('Europe/Helsinki')
+    tm = now.strftime("%H:%M:%S:%p")
     
-#     # Get current time in Finnish timezone
-#     now = datetime.datetime.now(helsinki)
-#     today = now.date()
-    
-#     d2 = today.strftime("%B %d, %Y")
-#     tm = now.strftime("%H:%M:%S:%p")
-    
-#     return f"{d2} at {tm}"
+    return f"{d2} at {tm}"
 
 def login_required(f):
     @wraps(f)
@@ -161,7 +154,7 @@ def sign_up():
 
         hashed_password = generate_password_hash(password)
         
-        mongo.db.signup.insert_one({"username": username, "email": email, "password": hashed_password, "activationStatus":"0", "registeredDate": nigerian_time()})
+        mongo.db.signup.insert_one({"username": username, "email": email, "password": hashed_password, "activationStatus":"0", "registeredDate": finnish_time()})
         flash("Account Created Successfully!", "success")
         return redirect(url_for("index"))
     else:
