@@ -9,27 +9,35 @@ import os, re, requests
 import datetime
 import pytz
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # app.config = os.urandom(24)
 
 # app.config["SECRET_KEY"] = "b'n\x1d\xb1\x8a\xc0Jg\x1d\x08|!F3\x04P\xbf'"
 
-def finnish_time():
-    '''
-    This function extracts
-    the current Finnish time
-    '''
-    # Define Finnish timezone
-    helsinki = pytz.timezone('Europe/Helsinki')
-    
-    # Get current time in Finnish timezone
-    now = datetime.datetime.now(helsinki)
-    today = now.date()
-    
+def nigerian_time():
+    now = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    today = datetime.date.today()
     d2 = today.strftime("%B %d, %Y")
-    tm = now.strftime("%H:%M:%S:%p")
+    tm = now.strftime("%H:%M:%S %p")
+    return (d2 +' '+'at'+' '+tm)
+
+# def finnish_time():
+#     '''
+#     This function extracts
+#     the current Finnish time
+#     '''
+#     # Define Finnish timezone
+#     helsinki = pytz.timezone('Europe/Helsinki')
     
-    return f"{d2} at {tm}"
+#     # Get current time in Finnish timezone
+#     now = datetime.datetime.now(helsinki)
+#     today = now.date()
+    
+#     d2 = today.strftime("%B %d, %Y")
+#     tm = now.strftime("%H:%M:%S:%p")
+    
+#     return f"{d2} at {tm}"
 
 def login_required(f):
     @wraps(f)
@@ -141,17 +149,19 @@ def sign_up():
             flash("Password Confirmation Mismatched, Please Confirm Your Password!", "danger")
             return render_template("public/register.html")
         # checkuser = mongo.db.sign_up.find_one({"matric_number":mat_no}, {"_id":0})
-        checkuser = mongo.db.signup.find_one({username:{"$exists":True}}, {"_id":0})
+        checkuser = mongo.db.signup.find_one({"username": username}, {"_id":0})
         if checkuser:
             flash("Sorry, User already registered!", "danger")
             return render_template("public/register.html")
         # checkemail = mongo.db.sign_up.find_one({"email":email}, {"_id":0})
-        checkemail = mongo.db.signup.find_one({email:{"$exists":True}}, {"_id":0})
+        checkemail = mongo.db.signup.find_one({"email": email}, {"_id":0})
         if checkemail:
             flash("Sorry, User with email address already exists!", "danger")
             return render_template("public/register.html")
+
+        hashed_password = generate_password_hash(password)
         
-        mongo.db.signup.insert_one({"username": username, username:username, "email": email, email:email, "password": password, "activationStatus":"0", "registeredDate": finnish_time()})
+        mongo.db.signup.insert_one({"username": username, "email": email, "password": hashed_password, "activationStatus":"0", "registeredDate": nigerian_time()})
         flash("Account Created Successfully!", "success")
         return redirect(url_for("index"))
     else:
@@ -166,7 +176,7 @@ def login():
         username = str(req["username"])
         pswd = req["pswd"]
         
-        checkuser = mongo.db.signup.find_one({username:{"$exists":True}}, {"_id":0})
+        checkuser = mongo.db.signup.find_one({"username": username}, {"_id":0})
         
         # x = re.search(pattern, string)
         
@@ -178,21 +188,22 @@ def login():
         #     flash("Account not activated. Contact Admin for account activation!", "danger")
         #     return render_template("public/index.html")
         
-        elif not pswd == checkuser["password"]:
+        if not check_password_hash(checkuser["password"], pswd):
             flash("Username/Password Incorrect!", "danger")
             return render_template("public/index.html")
                   
-        else:
-            del checkuser["password"]
-            session["user"] = checkuser
-            session["login"]=True
-            if checkuser["username"] == "admin":
-                flash("Logged in Successfully! Welcome to your Dashboard!!", "success")
-                return redirect(url_for("admin_dashboard"))
+
+        del checkuser["password"]
+        session["user"] = checkuser
+        session["login"]=True
+
+        # if checkuser["username"] == "admin":
+        #     flash("Logged in Successfully! Welcome to your Dashboard!!", "success")
+        #     return redirect(url_for("admin_dashboard"))
             
-            else:
-                flash("Logged in Successfully! Welcome to your Dashboard!!", "success")
-                return redirect(url_for("users_dashboard"))
+        # else:
+        flash("Logged in Successfully! Welcome to your Dashboard!!", "success")
+        return redirect(url_for("users_dashboard"))
     
     return render_template("public/index.html")
 
